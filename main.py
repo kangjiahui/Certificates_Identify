@@ -6,7 +6,7 @@ from paddleocr import PaddleOCR, draw_ocr
 # Paddleocr目前支持中英文、英文、法语、德语、韩语、日语，可以通过修改lang参数进行切换
 # 参数依次为`ch`, `en`, `french`, `german`, `korean`, `japan`。
 ocr = PaddleOCR(use_angle_cls=True, lang="ch")  # need to run only once to download and load model into memory
-img_path = 'test/10.jpg'
+img_path = 'test/3.jpg'
 img = cv2.imread(img_path)
 start = time.time()
 result = ocr.ocr(img, cls=True)
@@ -14,9 +14,9 @@ print(result)
 print(time.time() - start)
 res = {}
 for line in result:
-    # print(line)
+    print(line)
     # 识别车牌
-    match_car = re.search('^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-Z0-9]{4}[A-Z0-9挂学警港澳]{1}$',
+    match_car = re.search('^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z][A-Z][A-Z0-9]{4}[A-Z0-9挂学警港澳]$',
                       line[-1][0])
     if match_car:
         res["车牌"] = [match_car.group(), line[0]]
