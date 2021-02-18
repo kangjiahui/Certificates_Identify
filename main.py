@@ -6,7 +6,7 @@ from paddleocr import PaddleOCR, draw_ocr
 # Paddleocr目前支持中英文、英文、法语、德语、韩语、日语，可以通过修改lang参数进行切换
 # 参数依次为`ch`, `en`, `french`, `german`, `korean`, `japan`。
 ocr = PaddleOCR(use_angle_cls=True, lang="ch")  # need to run only once to download and load model into memory
-img_path = 'test/3.jpg'
+img_path = 'test/2.jpg'
 img = cv2.imread(img_path)
 start = time.time()
 result = ocr.ocr(img, cls=True)
@@ -21,7 +21,7 @@ for line in result:
     if match_car:
         res["车牌"] = [match_car.group(), line[0]]
     # 识别身份证
-    match_id = re.search("^[1-9]\d{5}(18|19|20|(3\d))\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$",
+    match_id = re.search("^[1-9]\d{5}(18|19|20)\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$",
                          line[-1][0])
     if match_id:
         print(match_id.group())
@@ -41,4 +41,4 @@ txts = [line[1][0] for line in result]
 scores = [line[1][1] for line in result]
 im_show = draw_ocr(image, boxes, txts, scores, font_path='simfang.ttf')
 im_show = Image.fromarray(im_show)
-im_show.save('result.jpg')
+im_show.save('result8.jpg')

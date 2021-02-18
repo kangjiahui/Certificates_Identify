@@ -5,7 +5,8 @@
    Author :       KangJiaHui
    date：         2020/02/07
 """
-
+import re
+from datetime import datetime
 import yaml
 from module.ocr import OCR
 import cv2
@@ -20,6 +21,8 @@ ocr = OCR()
 # result = ocr.get_all(img)
 # print(result)
 # print(ocr.search_info(config['危险货物运输押运人员证']['有效期'][2], result))
+
+# TODO 查找阈值像素范围需要根据图像像素大小自适应
 
 
 def reset(conf):
@@ -42,17 +45,14 @@ def name_recog(lst, conf):
     :param conf: dict, get from yaml file.
     :return: string, the key of matched certificate.
     """
-    paper_type = ""
     for key in conf["证件"]:
         regular = conf["证件"][key]["证件名"]
-        # print(regular, key)
-        # print(type(regular))
         if isinstance(regular, str):
             if ocr.get_location(regular, lst):
                 return key
         elif isinstance(regular, list):
             location = ocr.get_location(regular[0], lst)
-            if ocr.get_info_by_location(lst, regular[2], location, regular[1], 5):
+            if ocr.get_info_by_location(lst, regular[2], location, regular[1], 100):
                 return key
     return None
 
@@ -81,13 +81,51 @@ def recog_one(image, conf, tmp_result):
             continue
         method = conf["证件"][name][key]
         loc = ocr.get_location(method[0], ocr_result)
-        print("key and key_location is {}, {}".format(key, loc))
-        result[key] = ocr.get_info_by_location(ocr_result, method[2], loc, method[1], 10)
+        result[key] = ocr.get_info_by_location(ocr_result, method[2], loc, method[1], 20)
     tmp_result[name] = result
+    return tmp_result
+
+
+def result_filter(tmp_result):
+    """
+    Do something with the first vision of result, such as date transform, invalid string delete.
+    :param tmp_result: dict, the result of recog_one()
+    :return: dict, witch will be the final result.
+    """
+    for name, dic in tmp_result.items():
+        if dic:
+            for k, v in dic.items():
+                if k == "日期" and v:
+                    tmp_result[name][k] = []
+                    for i in v:
+                        if len(i.split("-")) == 3:
+                            t = datetime.strptime(i, '%Y-%m-%d')
+                            diff = t - datetime.today()
+                            if diff.days > 0:
+                                tmp_result[name][k].append(t)
+                        if len(re.split("[年月]", i)) == 3:
+                            r = re.split("[年月]", i)
+                            t = r[0] + "-" + r[1]
+                            t = datetime.strptime(t, '%Y-%m')
+                            diff = t - datetime.today()
+                            if diff.days > 0:
+                                tmp_result[name][k].append(t)
+                if k == "姓名" and v:
+                    v = tmp_result[name][k] = [i for i in v if i != "姓名"]
+                if len(v) == 1:
+                    tmp_result[name][k] = v[0]
     return tmp_result
 
 
 if __name__ == '__main__':
     tmp = reset(config)
-    img = cv2.imread("../test/3.jpg")
-    print(recog_one(img, config, tmp))
+    while True:
+        cwd = input("Please input an image file:")
+        if cwd == 'q':
+            result_filter(tmp)
+            print(tmp)
+            break
+        img = cv2.imread(cwd)
+        recog_one(img, config, tmp)
+        print(tmp)
+

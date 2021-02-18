@@ -22,29 +22,29 @@ def get_neighbor_box(lst, box, aim_pos, thresh):
             thresh means how far the target could be away with keyword.
     :return: list, all lines matched. e.x.
     """
-    result = []
+    result = [box]
     if aim_pos == "RIGHT":
         for line in lst:
-            if abs(line[0][3][0] - box[0][2][0]) < thresh * 10 and abs(line[0][3][1] - box[0][2][1]) < thresh:
+            if 0 < abs(line[0][3][0] - box[0][2][0]) < thresh * 10 and 0 < abs(line[0][3][1] - box[0][2][1]) < thresh:
                 result.append(line)
     elif aim_pos == "LEFT":
         for line in lst:
-            if abs(line[0][2][0] - box[0][3][0]) < thresh * 10 and abs(line[0][2][1] - box[0][3][1]) < thresh:
+            if 0 < abs(line[0][2][0] - box[0][3][0]) < thresh * 10 and 0 < abs(line[0][2][1] - box[0][3][1]) < thresh:
                 result.append(line)
     elif aim_pos == "DOWN":
         for line in lst:
-            if abs(line[0][1][1] - box[0][2][1]) < thresh and \
-                    min(abs(line[0][2][0] - box[0][2][0]), abs(line[0][3][0] - box[0][3][0])) \
+            if 0 < abs(line[0][1][1] - box[0][2][1]) < thresh and \
+                    0 < min(abs(line[0][2][0] - box[0][2][0]), abs(line[0][3][0] - box[0][3][0])) \
                     < abs(line[0][2][0] - line[0][3][0] - box[0][2][0] + box[0][3][0]) / 2:
                 result.append(line)
     elif aim_pos == "UP":
         for line in lst:
-            if abs(line[0][2][1] - box[0][1][1]) < thresh and \
-                    min(abs(line[0][2][0] - box[0][2][0]), abs(line[0][3][0] - box[0][3][0])) \
+            if 0 < abs(line[0][2][1] - box[0][1][1]) < thresh and \
+                    0 < min(abs(line[0][2][0] - box[0][2][0]), abs(line[0][3][0] - box[0][3][0])) \
                     < abs(line[0][2][0] - line[0][3][0] - box[0][2][0] + box[0][3][0]) / 2:
                 result.append(line)
     elif aim_pos == "SAME":
-        result.append(box)
+        pass
     # else:
     #     # TODO 定义FLAG输入错误的异常类
     #     raise Exception
@@ -98,6 +98,7 @@ class OCR(object):
                 e.x.[['鲁FBR932', [[305.0, 561.0], [457.0, 556.0], [458.0, 593.0], [307.0, 598.0]]],
                 ['鲁GLN851挂', [[1663.0, 480.0], [1886.0, 480.0], [1886.0, 510.0], [1663.0, 510.0]]]]
         """
+        print("info_regular is {}".format(info_regular))
         matched_info = []
         for box in keyword_location:
             print("keyword_location is {}".format(box))
