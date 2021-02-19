@@ -13,14 +13,8 @@ import cv2
 
 with open("../confs/config.yaml", "r") as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
-# print(type(config["证件"]['危险货物运输押运人员证']['证件名']))
 
 ocr = OCR()
-
-
-# result = ocr.get_all(img)
-# print(result)
-# print(ocr.search_info(config['危险货物运输押运人员证']['有效期'][2], result))
 
 # TODO 查找阈值像素范围需要根据图像像素大小自适应
 
@@ -99,19 +93,26 @@ def result_filter(tmp_result):
                     tmp_result[name][k] = []
                     for i in v:
                         if len(i.split("-")) == 3:
-                            t = datetime.strptime(i, '%Y-%m-%d')
-                            diff = t - datetime.today()
-                            if diff.days > 0:
-                                tmp_result[name][k].append(t)
+                            date = i.split("-")
+                            today = datetime.today().strftime("%Y-%m-%d").split("-")
+                            print("date is {}, today is {}".format(date, today))
+                            if (str(date[0]) > str(today[0])) or \
+                                    (str(date[0]) == str(today[0]) and str(date[1]) > str(today[1])) or \
+                                    (str(date[0]) == str(today[0]) and str(date[1]) == str(today[1]) and
+                                     str(date[2]) > str(today[2])):
+                                tmp_result[name][k].append(i)
                         if len(re.split("[年月]", i)) == 3:
-                            r = re.split("[年月]", i)
-                            t = r[0] + "-" + r[1]
-                            t = datetime.strptime(t, '%Y-%m')
-                            diff = t - datetime.today()
-                            if diff.days > 0:
-                                tmp_result[name][k].append(t)
+                            date = re.split("[年月]", i)[:2]
+                            date_str = date[0] + "-" + date[1]
+                            today = datetime.today().strftime("%Y-%m-%d").split("-")
+                            if (str(date[0]) > str(today[0])) or \
+                                    (str(date[0]) == str(today[0]) and str(date[1]) >= str(today[1])):
+                                tmp_result[name][k].append(date_str)
+                    v = tmp_result[name][k]
                 if k == "姓名" and v:
                     v = tmp_result[name][k] = [i for i in v if i != "姓名"]
+                if len(v) == 0:
+                    tmp_result[name][k] = None
                 if len(v) == 1:
                     tmp_result[name][k] = v[0]
     return tmp_result
@@ -128,4 +129,3 @@ if __name__ == '__main__':
         img = cv2.imread(cwd)
         recog_one(img, config, tmp)
         print(tmp)
-
