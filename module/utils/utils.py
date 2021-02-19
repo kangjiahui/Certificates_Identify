@@ -8,10 +8,6 @@
 import base64
 import cv2
 import numpy as np
-import hashlib
-import json
-import time
-from functools import wraps
 
 
 def image_to_base64(image_np):
