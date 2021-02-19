@@ -51,6 +51,44 @@ def name_recog(lst, conf):
     return None
 
 
+def filter_one(result):
+    """
+    Do something with the first vision of result, such as date transform, invalid string delete.
+    :param result: dict, the result dict for one paper.
+        e.x. {"有效期": ["2018年4月", "2021年4月"], "经营范围": ["危险化学品"], "车牌": ["鲁FBR932"]}
+    :return: dict, the processed result dict for one paper.
+        e.x. {"有效期": "2021-4", "经营范围": "危险化学品", "车牌": "鲁FBR932"}
+    """
+    for k, v in result.items():
+        if k == "日期" and v:
+            result[k] = []
+            for i in v:
+                if len(i.split("-")) == 3:
+                    date = i.split("-")
+                    today = datetime.today().strftime("%Y-%m-%d").split("-")
+                    print("date is {}, today is {}".format(date, today))
+                    if (str(date[0]) > str(today[0])) or \
+                            (str(date[0]) == str(today[0]) and str(date[1]) > str(today[1])) or \
+                            (str(date[0]) == str(today[0]) and str(date[1]) == str(today[1]) and
+                             str(date[2]) > str(today[2])):
+                        result[k].append(i)
+                if len(re.split("[年月]", i)) == 3:
+                    date = re.split("[年月]", i)[:2]
+                    date_str = date[0] + "-" + date[1]
+                    today = datetime.today().strftime("%Y-%m-%d").split("-")
+                    if (str(date[0]) > str(today[0])) or \
+                            (str(date[0]) == str(today[0]) and str(date[1]) >= str(today[1])):
+                        result[k].append(date_str)
+            v = result[k]
+        if k == "姓名" and v:
+            v = result[k] = [i for i in v if i != "姓名"]
+        if len(v) == 0:
+            result[k] = None
+        if len(v) == 1:
+            result[k] = v[0]
+    return result
+
+
 def recog_one(image, conf, tmp_result):
     """
     Recognize one image, and to update tmp_result dict
@@ -76,45 +114,8 @@ def recog_one(image, conf, tmp_result):
         method = conf["证件"][name][key]
         loc = ocr.get_location(method[0], ocr_result)
         result[key] = ocr.get_info_by_location(ocr_result, method[2], loc, method[1], 20)
+    filter_one(result)
     tmp_result[name] = result
-    return tmp_result
-
-
-def result_filter(tmp_result):
-    """
-    Do something with the first vision of result, such as date transform, invalid string delete.
-    :param tmp_result: dict, the result of recog_one()
-    :return: dict, witch will be the final result.
-    """
-    for name, dic in tmp_result.items():
-        if dic:
-            for k, v in dic.items():
-                if k == "日期" and v:
-                    tmp_result[name][k] = []
-                    for i in v:
-                        if len(i.split("-")) == 3:
-                            date = i.split("-")
-                            today = datetime.today().strftime("%Y-%m-%d").split("-")
-                            print("date is {}, today is {}".format(date, today))
-                            if (str(date[0]) > str(today[0])) or \
-                                    (str(date[0]) == str(today[0]) and str(date[1]) > str(today[1])) or \
-                                    (str(date[0]) == str(today[0]) and str(date[1]) == str(today[1]) and
-                                     str(date[2]) > str(today[2])):
-                                tmp_result[name][k].append(i)
-                        if len(re.split("[年月]", i)) == 3:
-                            date = re.split("[年月]", i)[:2]
-                            date_str = date[0] + "-" + date[1]
-                            today = datetime.today().strftime("%Y-%m-%d").split("-")
-                            if (str(date[0]) > str(today[0])) or \
-                                    (str(date[0]) == str(today[0]) and str(date[1]) >= str(today[1])):
-                                tmp_result[name][k].append(date_str)
-                    v = tmp_result[name][k]
-                if k == "姓名" and v:
-                    v = tmp_result[name][k] = [i for i in v if i != "姓名"]
-                if len(v) == 0:
-                    tmp_result[name][k] = None
-                if len(v) == 1:
-                    tmp_result[name][k] = v[0]
     return tmp_result
 
 
@@ -123,8 +124,6 @@ if __name__ == '__main__':
     while True:
         cwd = input("Please input an image file:")
         if cwd == 'q':
-            result_filter(tmp)
-            print(tmp)
             break
         img = cv2.imread(cwd)
         recog_one(img, config, tmp)

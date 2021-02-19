@@ -5,11 +5,8 @@
    Author :       KangJiaHui
    date：         2021/02/04
 """
-
-import time
-import cv2
 import re
-from paddleocr import PaddleOCR, draw_ocr
+from paddleocr import PaddleOCR
 
 
 def get_neighbor_box(lst, box, aim_pos, thresh):
@@ -45,9 +42,9 @@ def get_neighbor_box(lst, box, aim_pos, thresh):
                 result.append(line)
     elif aim_pos == "SAME":
         pass
-    # else:
-    #     # TODO 定义FLAG输入错误的异常类
-    #     raise Exception
+    else:
+        # TODO 定义FLAG输入错误的异常类
+        raise Exception
     return result
 
 
@@ -98,15 +95,11 @@ class OCR(object):
                 e.x.[['鲁FBR932', [[305.0, 561.0], [457.0, 556.0], [458.0, 593.0], [307.0, 598.0]]],
                 ['鲁GLN851挂', [[1663.0, 480.0], [1886.0, 480.0], [1886.0, 510.0], [1663.0, 510.0]]]]
         """
-        print("info_regular is {}".format(info_regular))
         matched_info = []
         for box in keyword_location:
-            print("keyword_location is {}".format(box))
             target = get_neighbor_box(result, box, aim_pos, thresh)
-            print("target is {}".format(target))
             for t in target:
                 info = re.search(info_regular, t[-1][0])
                 if info:
                     matched_info.append(info.group(0))
-        print(matched_info)
         return matched_info
