@@ -41,3 +41,5 @@ if __name__ == '__main__':
     print(api.match_face_ocr(image_to_base64(cv2.imread("test/8.jpg"))))
     print(api.match_face_ocr(image_to_base64(cv2.imread("test/5.jpg"))))
     print(api.match_face_ocr(image_to_base64(cv2.imread("test/9.jpg"))))
+
+    print(api.info_match())

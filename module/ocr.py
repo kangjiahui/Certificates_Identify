@@ -5,6 +5,7 @@
    Author :       KangJiaHui
    date：         2021/02/04
 """
+import itertools
 import re
 import os
 import yaml
@@ -214,3 +215,30 @@ class OCR(object):
         :return: bool, True means face matched, False means face not matched.
         """
         return face.match_in_ocr(self.tmp_result, image_base64)
+
+    def info_match(self):
+        """
+        Match information between two or more certificates according to config["匹配"]
+        :return: dict, e.x. {"车牌": {"LNG车": True}, "姓名": {"驾驶员": True}, "人脸": {"驾驶员": True}}
+        """
+        print(self.config["匹配"])
+        result = {}
+        for key, value in self.config["匹配"].items():
+            result[key] = {}
+            for k, v in value.items():
+                tmp = []
+                for i in v:
+                    tmp.append(self.tmp_result[i][key])
+                if key == "人脸":
+                    result[key][k] = True
+                    lst = list(itertools.combinations(tmp, 2))
+                    for t in lst:
+                        if not face.match_two_features(0.5, t[0], t[1]):
+                            result[key][k] = False
+                else:
+                    if len(set(tmp)) == 1:
+                        result[key][k] = True
+                    else:
+                        result[key][k] = False
+        return result
+

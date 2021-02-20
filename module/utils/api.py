@@ -69,3 +69,17 @@ def match_face_ocr(image_base64_1):
         result_json = json.dumps({"result": -1, "message": msg})
     return result_json
 
+
+def info_match():
+    """
+    Match information between two or more certificates according to config["匹配"]
+    :return: dict, e.x. {"车牌": {"LNG车": True}, "姓名": {"驾驶员": True}, "人脸": {"驾驶员": True}}
+    """
+    try:
+        result = ocr.info_match()
+        result_json = json.dumps({"result": 0, "message": "SUCCESS", "match": result}, ensure_ascii=False)
+    except Exception as e:
+        msg = str(e)
+        result_json = json.dumps({"result": -1, "message": msg})
+    return result_json
+

@@ -130,7 +130,9 @@ class FaceRecognition(object):
         :param feature_2: vector presents a face feature
         :return: bool, True means face matched, False means face not matched.
         """
-        distance = calculate_distance(feature_1, feature_2)
+        vector_1 = np.array(feature_1)
+        vector_2 = np.array(feature_2)
+        distance = calculate_distance(vector_1, vector_2)
         if distance < thresh:
             return True  # True means face matched
         return False  # False means face not matched
