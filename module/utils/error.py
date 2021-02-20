@@ -3,7 +3,7 @@
    File Name：     error.py
    Description :  customized exception
    Author :       KangJiahui
-   date：         2021/01/28
+   date：         2021/02/19
 """
 
 

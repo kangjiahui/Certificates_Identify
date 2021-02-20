@@ -51,14 +51,6 @@ def resize(image):
     return image
 
 
-class MatchException(Exception):
-    def __init__(self):
-        self.msg = "Invalid image input!"
-
-    def __str__(self):
-        return str(self.msg)
-
-
 class FaceRecognition(object):
     def __init__(self):
         self.predictor_path = os.path.join(os.getcwd(), 'module/face_recog/params',
@@ -102,28 +94,6 @@ class FaceRecognition(object):
         feature_vector = list(self.facerec.compute_face_descriptor(face_chip))
         return feature_vector
 
-    def match_identity(self, feature_vector, thresh, score_rec, image_base64=None):
-        """
-        Match the input feature vector and vector for each face in one image.
-        Once a face matched, it will return True.
-        :param score_rec: float, the score of detected faces should be larger than score_rec
-        :param feature_vector: list, the feature vector to be matched
-        :param thresh: distance between face and matched face should be smaller than thresh
-        :param image_base64: image encoded in base64
-        :return:bool: True means face matched, False means face not matched.
-        """
-        image = resize(base64_to_image(image_base64))
-        faces, scores, idx = self.detector.run(image, 1, score_rec)
-        for face in faces:
-            shape = self.sp(image, face)
-            face_chip = dlib.get_face_chip(image, shape)
-            face_descriptor = np.array(self.facerec.compute_face_descriptor(face_chip))
-            distance = calculate_distance(face_descriptor, np.array(feature_vector))
-            print(distance)
-            if distance < thresh:
-                return True  # True means face matched
-        return False  # False means face not matched
-
     def match_two_images(self, thresh, score_rec, image_base64_1, image_base64_2):
         """
         Match face in two images.
@@ -147,8 +117,58 @@ class FaceRecognition(object):
         face_chip_2 = dlib.get_face_chip(image_2, shape_2)
         face_descriptor_2 = np.array(self.facerec.compute_face_descriptor(face_chip_2))
         distance = calculate_distance(face_descriptor_1, face_descriptor_2)
-        print(distance)
         if distance < thresh:
             return True  # True means face matched
         return False  # False means face not matched
+
+    @staticmethod
+    def match_two_features(thresh, feature_1, feature_2):
+        """
+        Match two face features.
+        :param thresh: float, distance between face and matched face should be smaller than thresh
+        :param feature_1: vector presents a face feature
+        :param feature_2: vector presents a face feature
+        :return: bool, True means face matched, False means face not matched.
+        """
+        distance = calculate_distance(feature_1, feature_2)
+        if distance < thresh:
+            return True  # True means face matched
+        return False  # False means face not matched
+
+    def match_identity(self, feature_vector, thresh, score_rec, image_base64):
+        """
+        Match the input feature vector and vector for each face in one image.
+        Once a face matched, it will return True.
+        :param score_rec: float, the score of detected faces should be larger than score_rec
+        :param feature_vector: list, the feature vector to be matched
+        :param thresh: distance between face and matched face should be smaller than thresh
+        :param image_base64: image encoded in base64
+        :return: bool, True means face matched, False means face not matched.
+        """
+        image = resize(base64_to_image(image_base64))
+        faces, scores, idx = self.detector.run(image, 1, score_rec)
+        for face in faces:
+            shape = self.sp(image, face)
+            face_chip = dlib.get_face_chip(image, shape)
+            face_descriptor = np.array(self.facerec.compute_face_descriptor(face_chip))
+            distance = calculate_distance(face_descriptor, np.array(feature_vector))
+            # print(distance)
+            if distance < thresh:
+                return True  # True means face matched
+        return False  # False means face not matched
+
+    def match_in_ocr(self, ocr_result, image_base64):
+        """
+        Match face in input image with the faces in all certificates. Once a certificate matched, return True.
+        :param ocr_result: dict, the result of all certificates' extracted information.
+        :param image_base64: image encoded in base64
+        :return: bool, True means face matched, False means face not matched.
+        """
+        for key, value in ocr_result.items():
+            if "人脸" in value.keys():
+                if self.match_identity(value["人脸"], 0.5, 0.5, image_base64):
+                    return True
+        return False
+
+
 

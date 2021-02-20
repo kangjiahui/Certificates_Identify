@@ -8,50 +8,61 @@
 
 import json
 from module.ocr import OCR
-from module.face_recog.faceRecognition import FaceRecognition
+import copy
 from module.utils.error import AimPose, NameRecFail
 
 ocr = OCR()
 print("OCR created!")
-face = FaceRecognition()
-print("FaceRcognition created!")
 
 
 def ocr_reset():
-    # try:
-    ocr.reset()
-    #     result_json = json.dumps({"result": 0, "message": "SUCCESS"})
-    # except Exception as e:
-    #     msg = str(e)
-    #     result_json = json.dumps({"result": -1, "message": msg})
-    # return result_json
+    """
+    Generate initial result.
+    :return: json, no new info return, just success or not.
+    """
+    try:
+        ocr.reset()
+        result_json = json.dumps({"result": 0, "message": "SUCCESS"})
+    except Exception as e:
+        msg = str(e)
+        result_json = json.dumps({"result": -1, "message": msg})
+    return result_json
 
 
 def ocr_recog_one(image_base64):
-    # try:
-    #     result = ocr.recog_one(image)
-    #     result_json = json.dumps({"result": 0, "message": "SUCCESS", "ocr": result}, ensure_ascii=False)
-    # except Exception as e:
-    #     msg = str(e)
-    #     result_json = json.dumps({"result": -1, "message": msg})
-    # return result_json
-    return ocr.recog_one(image_base64)
-
-
-def match_face(thresh, score_rec, image_base64_1, image_base64_2):
     """
-    Match the input feature vector and vector for each face in one image.
-    Once a face matched, it will return True.
-    If path and image coexist, then path will cover image.
-    :param image_base64_2: image encoded in base64
+    Extract information from an image.
+    :param image_base64: image encoded in base64
+    :return: json,
+        e.x. {"result": 0, "message": "SUCCESS", "ocr": {"特种设备使用登记证": {"发证日期": null},
+        "中华人民共和国道路运输证": {"有效期": "2021-04", "经营范围": null, "车牌": "鲁YZ393挂"},
+        "道路危险货物运输驾驶员证": {"有效期": null, "姓名": "安孔全"},
+        "危险货物运输押运人员证": {"有效期": null, "姓名": "刘超", "身份证号": "23028119820318091X"},
+        "中华人民共和国机动车驾驶证": {"有效期": "2022-01-04", "姓名": "方海桥"},
+        "中华人民共和国机动车行驶证": {"有效期": "2821-07", "车牌": "鲁FBR932"}}}
+    """
+    try:
+        result = ocr.recog_one(image_base64)
+        result_out = copy.deepcopy(result)
+        for key, value in result_out.items():
+            if value:
+                result_out[key] = {k: v for k, v in value.items() if k != "人脸"}
+        result_json = json.dumps({"result": 0, "message": "SUCCESS", "ocr": result_out}, ensure_ascii=False)
+    except Exception as e:
+        msg = str(e)
+        result_json = json.dumps({"result": -1, "message": msg})
+    return result_json
+
+
+def match_face_ocr(image_base64_1):
+    """
+    Match face in input image with the faces in all certificates. Once a certificate matched, return True.
     :param image_base64_1: image encoded in base64
-    :param score_rec: float, the score of detected faces should be larger than score_rec
-    :param thresh: distance between face and matched face should be smaller than thresh
     :return:json:
         e.x. {"result": 0, "message": "SUCCESS", "flag": True}
     """
     try:
-        flag = face.match_identity(thresh, score_rec, image_base64_1, image_base64_2)
+        flag = ocr.face_match(image_base64_1)
         result_json = json.dumps({"result": 0, "message": "SUCCESS", "flag": flag})
     except Exception as e:
         msg = str(e)

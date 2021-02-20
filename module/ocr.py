@@ -107,7 +107,7 @@ def filter_one(result):
         e.x. {"有效期": "2021-4", "经营范围": "危险化学品", "车牌": "鲁FBR932"}
     """
     for k, v in result.items():
-        if k == "日期" and v:
+        if k == "有效期" and v:
             result[k] = []
             for i in v:
                 if len(i.split("-")) == 3:
@@ -183,11 +183,7 @@ class OCR(object):
     def recog_one(self, image_base64):
         """
         Recognize one image, and to update tmp_result dict
-        :param tmp_result: e.x. {"特种设备使用登记证": {"发证日期": "2018年8月1日"}，"中华人民共和国道路运输证": None,
-                                "危险货物运输押运人员证": None, "中华人民共和国机动车驾驶证": None,
-                                "中华人民共和国机动车行驶证": None, "道路危险货物运输驾驶员证": None}
-        :param image: numpy.ndarray, input image
-        :param conf: dict, get from yaml file.
+        :param image_base64: image encoded in base64
         :return: tmp_result: e.x. {"特种设备使用登记证": {"发证日期": "2018年8月1日"}，
                                 "中华人民共和国道路运输证": {"有效期": None, "经营范围": "危险化学品", "车牌": "鲁FBR932"},
                                 "危险货物运输押运人员证": None, "中华人民共和国机动车驾驶证": None,
@@ -199,8 +195,8 @@ class OCR(object):
         if not name:
             raise NameRecFail
         result = {}
-        if name in self.config["匹配"]["人脸"]:
-            result["face"] = face.face_register(image_base64, 0.5)
+        if name in self.config["人脸"]:
+            result["人脸"] = face.face_register(image_base64, 0.5)
         for key in self.config["证件"][name]:
             if key == "证件名":
                 continue
@@ -210,3 +206,11 @@ class OCR(object):
         filter_one(result)
         self.tmp_result[name] = result
         return self.tmp_result
+
+    def face_match(self, image_base64):
+        """
+        Match face in input image with the faces in all certificates. Once a certificate matched, return True.
+        :param image_base64: image encoded in base64
+        :return: bool, True means face matched, False means face not matched.
+        """
+        return face.match_in_ocr(self.tmp_result, image_base64)
