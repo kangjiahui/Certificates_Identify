@@ -167,9 +167,10 @@ class FaceRecognition(object):
         :return: bool, True means face matched, False means face not matched.
         """
         for key, value in ocr_result.items():
-            if "人脸" in value.keys():
-                if self.match_identity(value["人脸"], 0.5, 0.5, image_base64):
-                    return True
+            if value:
+                if "人脸" in value.keys():
+                    if self.match_identity(value["人脸"], 0.5, 0.5, image_base64):
+                        return True
         return False
 
 

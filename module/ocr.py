@@ -139,7 +139,7 @@ def filter_one(result):
 class OCR(object):
     def __init__(self):
         self.model = PaddleOCR(use_angle_cls=True, lang="ch")
-        with open(os.path.join(os.getcwd(), "confs/config.yaml"), "r") as f:
+        with open(os.path.join(os.getcwd(), "confs/certificate.yaml"), "r") as f:
             self.config = yaml.load(f, Loader=yaml.FullLoader)
         self.tmp_result = {}
         self.reset()
@@ -228,17 +228,20 @@ class OCR(object):
             for k, v in value.items():
                 tmp = []
                 for i in v:
-                    tmp.append(self.tmp_result[i][key])
-                if key == "人脸":
+                    if self.tmp_result[i]:
+                        tmp.append(self.tmp_result[i][key])
+                if key == "人脸" and len(tmp) > 1:
                     result[key][k] = True
                     lst = list(itertools.combinations(tmp, 2))
                     for t in lst:
                         if not face.match_two_features(0.5, t[0], t[1]):
                             result[key][k] = False
-                else:
+                elif len(tmp) > 1:
                     if len(set(tmp)) == 1:
                         result[key][k] = True
                     else:
                         result[key][k] = False
+                else:
+                    result[key][k] = False
         return result
 
