@@ -18,7 +18,7 @@ curl localhost:8100/reset:
 {"result": 0, "message": "SUCCESS"}
 
 curl -H "Content-Type:application/json" -H "Data_Type:msg" -X POST -d@certificate_image_1.json localhost:8100/ocr   
-{"result": 0, "message": "SUCCESS", "ocr": {"特种设备使用登记证": null, "中华人民共和国道路运输证": null, "道路危险货物运输驾驶员证": null, : "刘超", "身份证号": "23028119820318091X"}, "中华人民共和国机动车驾驶证": null, "中华人民共和国机动车行驶证": null}}
+{"result": 0, "message": "SUCCESS", "ocr": {"特种设备使用登记证": null, "中华人民共和国道路运输证": null, "道路危险货物运输驾驶员证": null, : "姜子牙", "身份证号": "23056519771001076X"}, "中华人民共和国机动车驾驶证": null, "中华人民共和国机动车行驶证": null}}
 
 curl -H "Content-Type:application/json" -H "Data_Type:msg" -X POST -d@face_image_1.json localhost:8100/face:  
 {"result": 0, "message": "SUCCESS", "flag": false}
@@ -54,11 +54,11 @@ FUNCTIONS
         :param image_base64: image encoded in base64
         :return: json,
             e.x. {"result": 0, "message": "SUCCESS", "ocr": {"特种设备使用登记证": {"发证日期": null},
-            "中华人民共和国道路运输证": {"有效期": "2021-04", "经营范围": null, "车牌": "鲁YZ393挂"},
-            "道路危险货物运输驾驶员证": {"有效期": null, "姓名": "安孔全"},
-            "危险货物运输押运人员证": {"有效期": null, "姓名": "刘超", "身份证号": "23028119820318091X"},
-            "中华人民共和国机动车驾驶证": {"有效期": "2022-01-04", "姓名": "方海桥"},
-            "中华人民共和国机动车行驶证": {"有效期": "2821-07", "车牌": "鲁FBR932"}}}
+            "中华人民共和国道路运输证": {"有效期": "2021-04", "经营范围": null, "车牌": "鲁YZ666挂"},
+            "道路危险货物运输驾驶员证": {"有效期": null, "姓名": "貂蝉"},
+            "危险货物运输押运人员证": {"有效期": null, "姓名": "姜子牙", "身份证号": "23057219650517091X"},
+            "中华人民共和国机动车驾驶证": {"有效期": "2022-01-04", "姓名": "杨戬"},
+            "中华人民共和国机动车行驶证": {"有效期": "2821-07", "车牌": "鲁FBR888"}}}
     
     ocr_reset()
         Generate initial result.

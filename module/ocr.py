@@ -139,9 +139,10 @@ def filter_one(result):
 class OCR(object):
     def __init__(self):
         self.model = PaddleOCR(use_angle_cls=True, lang="ch")
-        with open(os.path.join(os.getcwd(), "confs/certificate.yaml"), "r") as f:
+        with open(os.path.join(os.getcwd(), "confs/certificate.yaml"), "r", encoding='UTF-8') as f:
             self.config = yaml.load(f, Loader=yaml.FullLoader)
         self.tmp_result = {}
+        self.pos_dict = {}  # To tell client witch certificate the image is.
         self.reset()
 
     def reset(self):
@@ -150,8 +151,11 @@ class OCR(object):
         :return: dict, e.x.{"特种设备使用登记证": None， "中华人民共和国道路运输证": None, "危险货物运输押运人员证": None,
                         "中华人民共和国机动车驾驶证": None, "中华人民共和国机动车行驶证": None, "道路危险货物运输驾驶员证": None}
         """
+        i = 1
         for key in self.config["证件"]:
             self.tmp_result[key] = None
+            self.pos_dict[key] = i
+            i += 1
         return self.tmp_result
 
     def get_all(self, img):
@@ -189,12 +193,14 @@ class OCR(object):
                                 "中华人民共和国道路运输证": {"有效期": None, "经营范围": "危险化学品", "车牌": "鲁FBR932"},
                                 "危险货物运输押运人员证": None, "中华人民共和国机动车驾驶证": None,
                                 "中华人民共和国机动车行驶证": None, "道路危险货物运输驾驶员证": None}
+        :return: pos: int, to tell client witch certificate the image is.
         """
         image = base64_to_image(image_base64)
         ocr_result = self.get_all(image)
         name = self.name_recog(ocr_result)
         if not name:
             raise NameRecFail
+        pos = self.pos_dict[name]
         result = {}
         if name in self.config["人脸"]:
             result["人脸"] = face.face_register(image_base64, 0.5)
@@ -206,7 +212,7 @@ class OCR(object):
             result[key] = get_info_by_location(ocr_result, method[2], loc, method[1], 20)
         filter_one(result)
         self.tmp_result[name] = result
-        return self.tmp_result
+        return self.tmp_result, pos
 
     def face_match(self, image_base64):
         """

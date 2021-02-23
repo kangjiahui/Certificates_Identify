@@ -35,19 +35,19 @@ def ocr_recog_one(image_base64):
     :param image_base64: image encoded in base64
     :return: json,
         e.x. {"result": 0, "message": "SUCCESS", "ocr": {"特种设备使用登记证": {"发证日期": null},
-        "中华人民共和国道路运输证": {"有效期": "2021-04", "经营范围": null, "车牌": "鲁YZ393挂"},
-        "道路危险货物运输驾驶员证": {"有效期": null, "姓名": "安孔全"},
-        "危险货物运输押运人员证": {"有效期": null, "姓名": "刘超", "身份证号": "23028119820318091X"},
-        "中华人民共和国机动车驾驶证": {"有效期": "2022-01-04", "姓名": "方海桥"},
-        "中华人民共和国机动车行驶证": {"有效期": "2821-07", "车牌": "鲁FBR932"}}}
+        "中华人民共和国道路运输证": {"有效期": "2021-04", "经营范围": null, "车牌": "鲁YZ666挂"},
+        "道路危险货物运输驾驶员证": {"有效期": null, "姓名": "貂蝉"},
+        "危险货物运输押运人员证": {"有效期": null, "姓名": "姜子牙", "身份证号": "23057219650517091X"},
+        "中华人民共和国机动车驾驶证": {"有效期": "2022-01-04", "姓名": "杨戬"},
+        "中华人民共和国机动车行驶证": {"有效期": "2821-07", "车牌": "鲁FBR888"}}}
     """
     try:
-        result = ocr.recog_one(image_base64)
+        result, pos = ocr.recog_one(image_base64)
         result_out = copy.deepcopy(result)
         for key, value in result_out.items():
             if value:
                 result_out[key] = {k: v for k, v in value.items() if k != "人脸"}
-        result_json = json.dumps({"result": 0, "message": "SUCCESS", "ocr": result_out}, ensure_ascii=False)
+        result_json = json.dumps({"result": 0, "message": "SUCCESS", "pos": pos, "ocr": result_out}, ensure_ascii=False)
     except Exception as e:
         msg = str(e)
         result_json = json.dumps({"result": -1, "message": msg})

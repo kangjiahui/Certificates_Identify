@@ -5,3 +5,11 @@ curl -H "Content-Type:application/json" -H "Data_Type:msg" -X POST -d@certificat
 curl -H "Content-Type:application/json" -H "Data_Type:msg" -X POST -d@face_image_1.json http://10.20.52.56:8100/face
 
 curl  http://10.20.52.56:8100/match
+
+#curl  http://10.20.40.39:8100/reset
+#
+#curl -H "Content-Type:application/json" -H "Data_Type:msg" -X POST -d@certificate_image_1.json http://10.20.40.39:8100/ocr
+#
+#curl -H "Content-Type:application/json" -H "Data_Type:msg" -X POST -d@face_image_1.json http://10.20.40.39:8100/face
+#
+#curl  http://10.20.40.39:8100/match

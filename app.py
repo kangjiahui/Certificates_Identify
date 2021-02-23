@@ -8,7 +8,7 @@ from gevent import pywsgi
 app = Flask(__name__)
 CORS(app, resources=r'/*')
 
-with open("confs/host.yaml", "r") as f:
+with open("confs/host.yaml", "r", encoding='UTF-8') as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
 
 
