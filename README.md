@@ -3,7 +3,7 @@
 
 代码定义了一种基于paddleocr识别结果，提取证件信息的通用逻辑。针对不同证件，通过修改配置文件 confs/certificate.yaml 进行设定。
 
-##环境安装：
+## 环境安装：
 安装cmake  
 pip install paddlepaddle==2.0.0rc1 -i https://mirror.baidu.com/pypi/simple  
 pip install paddleocr==2.0.2 -i https://mirror.baidu.com/pypi/simple  
@@ -13,7 +13,7 @@ pip install flask_cors
 pip install gevent  
 pip install opencv-python
 
-##返回值示例：
+## 返回值示例：
 curl localhost:8100/reset:  
 {"result": 0, "message": "SUCCESS"}
 
@@ -26,7 +26,7 @@ curl -H "Content-Type:application/json" -H "Data_Type:msg" -X POST -d@face_image
 curl localhost:8100/match:  
 {"result": 0, "message": "SUCCESS", "match": {"车牌": {"LNG车": false}, "姓名": {"驾驶员": false}, "人脸": {"驾驶员": false}}}
 
-##module.utils.api接口文档:
+## module.utils.api接口文档:
 
 NAME
     module.utils.api
