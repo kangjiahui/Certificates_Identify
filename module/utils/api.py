@@ -54,15 +54,46 @@ def ocr_recog_one(image_base64):
     return result_json
 
 
-def match_face_ocr(image_base64_1):
+def face_register(image_base64):
+    """
+    get face feature from certificate image, stored in ocr.face_feature
+    :param image_base64: image encoded in base64
+    :return: json, no new info return, just success or not.
+    """
+    try:
+        ocr.face_register(image_base64)
+        result_json = json.dumps({"result": 0, "message": "SUCCESS"})
+    except Exception as e:
+        msg = str(e)
+        result_json = json.dumps({"result": -1, "message": msg})
+    return result_json
+
+
+def match_face_ocr(image_base64):
     """
     Match face in input image with the faces in all certificates. Once a certificate matched, return True.
-    :param image_base64_1: image encoded in base64
+    :param image_base64: image encoded in base64
     :return:json:
         e.x. {"result": 0, "message": "SUCCESS", "flag": True}
     """
     try:
-        flag = ocr.face_match(image_base64_1)
+        flag = ocr.face_match(image_base64)
+        result_json = json.dumps({"result": 0, "message": "SUCCESS", "flag": flag})
+    except Exception as e:
+        msg = str(e)
+        result_json = json.dumps({"result": -1, "message": msg})
+    return result_json
+
+
+def car_plate_match(image_base64):
+    """
+    Match car plate in input image with all car plates in certificates. Once a certificate matched, return True.
+    :param image_base64: image encoded in base64
+    :return: json
+        e.x. {"result": 0, "message": "SUCCESS", "flag": True}
+    """
+    try:
+        flag = ocr.car_plate_match(image_base64)
         result_json = json.dumps({"result": 0, "message": "SUCCESS", "flag": flag})
     except Exception as e:
         msg = str(e)

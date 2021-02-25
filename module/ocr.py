@@ -86,8 +86,7 @@ def get_info_by_location(result, info_regular, keyword_location, aim_pos, thresh
     :param thresh: int, in mode "RIGHT", "LEFT", "DOWN" and "UP",
             thresh means how far the target could be away with keyword.
     :return: list, contains all matched info strings.
-            e.x.[['鲁FBR932', [[305.0, 561.0], [457.0, 556.0], [458.0, 593.0], [307.0, 598.0]]],
-            ['鲁GLN851挂', [[1663.0, 480.0], [1886.0, 480.0], [1886.0, 510.0], [1663.0, 510.0]]]]
+            e.x.['鲁FBR932', '鲁GLN851挂']
     """
     matched_info = []
     for box in keyword_location:
@@ -144,6 +143,7 @@ class OCR(object):
         self.tmp_result = {}
         self.pos_dict = {}  # To tell client witch certificate the image is.
         self.reset()
+        self.face_feature = []
 
     def reset(self):
         """
@@ -176,12 +176,16 @@ class OCR(object):
         """
         for key in self.config["证件"]:
             regular = self.config["证件"][key]["证件名"]
-            if isinstance(regular, str):
-                if get_location(regular, result):
-                    return key
-            elif isinstance(regular, list):
+            if isinstance(regular, list):
                 location = get_location(regular[0], result)
                 if get_info_by_location(result, regular[2], location, regular[1], 100):
+                    return key
+            elif isinstance(regular, tuple):
+                flag = True
+                for i in regular:
+                    if not get_location(i, result):
+                        flag = False
+                if flag:
                     return key
         return None
 
@@ -203,13 +207,23 @@ class OCR(object):
         pos = self.pos_dict[name]
         result = {}
         if name in self.config["人脸"]:
-            result["人脸"] = face.face_register(image_base64, 0.5)
+            feature = face.face_register(image_base64, 0.5)
+            result["人脸"] = feature
+            self.face_feature.append(feature)
         for key in self.config["证件"][name]:
             if key == "证件名":
                 continue
             method = self.config["证件"][name][key]
-            loc = get_location(method[0], ocr_result)
-            result[key] = get_info_by_location(ocr_result, method[2], loc, method[1], 20)
+            if isinstance(method, list):
+                loc = get_location(method[0], ocr_result)
+                result[key] = get_info_by_location(ocr_result, method[2], loc, method[1], 20)
+            elif isinstance(method, str):
+                res = []
+                for line in ocr_result:
+                    info = re.search(method, line[-1][0])
+                    if info:
+                        res.append(info.group(0))
+                result[key] = res
         filter_one(result)
         self.tmp_result[name] = result
         return self.tmp_result, pos
@@ -250,4 +264,30 @@ class OCR(object):
                 else:
                     result[key][k] = False
         return result
+
+    def car_plate_match(self, image_base64):
+        """
+        现场监控图像提取车牌信息，在证件信息提取的结果中进行比对。
+        :param image_base64: image encoded in base64
+        :return: bool, True表示匹配，False表示不匹配
+        """
+        image = base64_to_image(image_base64)
+        ocr_result = self.get_all(image)
+        plate = get_location('[\u4E00-\u9FA5][A-Z][A-Z0-9]{4}[A-Z0-9挂学警港澳]', ocr_result)
+        for key, value in self.tmp_result.items():
+            if value:
+                if "车牌" in value.keys():
+                    if value["车牌"] == plate:
+                        return True
+        return False
+
+    def face_register(self, image_base64):
+        """
+        读取证件图片，并将检测到的人脸提取特征向量存入ocr对象的属性中，为现场人脸核验提供比对信息。
+        :param image_base64: image encoded in base64
+        :return: 人脸特征向量
+        """
+        feature = face.face_register(image_base64, 0.5)
+        self.face_feature.append(feature)
+        return feature
 

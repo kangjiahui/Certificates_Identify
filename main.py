@@ -30,6 +30,7 @@ def ocr_once():
 if __name__ == '__main__':
     api.ocr_reset()
     # t1 = time.time()
+
     # print(image_to_base64(cv2.imread("test/1.jpg")))
     api.ocr_recog_one(image_to_base64(cv2.imread("test/1.jpg")))
     api.ocr_recog_one(image_to_base64(cv2.imread("test/3.jpg")))

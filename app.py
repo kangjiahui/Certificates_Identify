@@ -16,10 +16,8 @@ with open("confs/host.yaml", "r", encoding='UTF-8') as f:
 # 根据config文件重置空result字典
 @app.route('/reset', methods=["POST"])
 def reset():
-    # result = api.ocr_reset()
-    # return result
-    print(123)
-    return '0'
+    result = api.ocr_reset()
+    return result
 
 
 # 提取单张证件信息
@@ -33,6 +31,16 @@ def ocr():
         return api.ocr_recog_one(request.form['user_image'])
 
 
+# 现场人脸注册
+@app.route('/register', methods=["POST"])
+def face():
+    if request.form['img_type'] == 'pic':
+        input_data = request.files
+        return api.face_register(base64.b64encode(input_data["user_image"].read()))
+    else:
+        return api.face_register(request.form['user_image'])
+
+
 # 现场人脸核验
 @app.route('/face', methods=["POST"])
 def face():
@@ -41,6 +49,16 @@ def face():
         return api.match_face_ocr(base64.b64encode(input_data["user_image"].read()))
     else:
         return api.match_face_ocr(request.form['user_image'])
+
+
+# 现场车牌核验
+@app.route('/car', methods=["POST"])
+def face():
+    if request.form['img_type'] == 'pic':
+        input_data = request.files
+        return api.car_plate_match(base64.b64encode(input_data["user_image"].read()))
+    else:
+        return api.car_plate_match(request.form['user_image'])
 
 
 # 证件信息比对
