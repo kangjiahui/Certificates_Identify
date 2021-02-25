@@ -142,8 +142,8 @@ class OCR(object):
             self.config = yaml.load(f, Loader=yaml.FullLoader)
         self.tmp_result = {}
         self.pos_dict = {}  # To tell client witch certificate the image is.
-        self.reset()
         self.face_feature = []
+        self.reset()
 
     def reset(self):
         """
@@ -151,6 +151,9 @@ class OCR(object):
         :return: dict, e.x.{"特种设备使用登记证": None， "中华人民共和国道路运输证": None, "危险货物运输押运人员证": None,
                         "中华人民共和国机动车驾驶证": None, "中华人民共和国机动车行驶证": None, "道路危险货物运输驾驶员证": None}
         """
+        self.face_feature = []
+        self.tmp_result = {}
+        self.pos_dict = {}
         i = 1
         for key in self.config["证件"]:
             self.tmp_result[key] = None
