@@ -9,7 +9,7 @@ def ocr_once():
     # Paddleocr目前支持中英文、英文、法语、德语、韩语、日语，可以通过修改lang参数进行切换
     # 参数依次为`ch`, `en`, `french`, `german`, `korean`, `japan`。
     ocr = PaddleOCR(use_angle_cls=True, lang="ch")  # need to run only once to download and load model into memory
-    img_path = 'test/12.png'
+    img_path = 'test/3.jpg'
     img = cv2.imread(img_path)
     start = time.time()
     result = ocr.ocr(img, cls=True)
@@ -24,10 +24,10 @@ def ocr_once():
     scores = [line[1][1] for line in result]
     im_show = draw_ocr(image, boxes, txts, scores, font_path='simfang.ttf')
     im_show = Image.fromarray(im_show)
-    im_show.save('result/result12.jpg')
+    im_show.save('result/result3.jpg')
 
 
-if __name__ == '__main__':
+def main():
     api.ocr_reset()
     # t1 = time.time()
 
@@ -37,13 +37,17 @@ if __name__ == '__main__':
     api.ocr_recog_one(image_to_base64(cv2.imread("test/7.jpg")))
     api.ocr_recog_one(image_to_base64(cv2.imread("test/8.jpg")))
     api.ocr_recog_one(image_to_base64(cv2.imread("test/10.jpg")))
-    result = api.ocr_recog_one(image_to_base64(cv2.imread("test/12.png")))
-    print(result)
+    print(api.ocr_recog_one(image_to_base64(cv2.imread("test/12.png"))))
     # print(time.time() - t1)
+    api.face_register(image_to_base64(cv2.imread("test/5.jpg")))
     print(api.match_face_ocr(image_to_base64(cv2.imread("test/8.jpg"))))
     print(api.match_face_ocr(image_to_base64(cv2.imread("test/5.jpg"))))
     print(api.match_face_ocr(image_to_base64(cv2.imread("test/9.jpg"))))
-
+    print(api.car_plate_match(image_to_base64(cv2.imread("test/3.jpg"))))
     print(api.info_match())
 
     # print(help(api))
+
+
+if __name__ == '__main__':
+    main()

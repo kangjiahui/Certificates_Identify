@@ -180,15 +180,19 @@ class OCR(object):
         for key in self.config["证件"]:
             regular = self.config["证件"][key]["证件名"]
             if isinstance(regular, list):
-                location = get_location(regular[0], result)
-                if get_info_by_location(result, regular[2], location, regular[1], 100):
-                    return key
-            elif isinstance(regular, tuple):
-                flag = True
-                for i in regular:
-                    if not get_location(i, result):
-                        flag = False
-                if flag:
+                if list({'RIGHT', 'LEFT', 'DOWN', 'UP', 'SAME'} & set(regular)):
+                    location = get_location(regular[0], result)
+                    if get_info_by_location(result, regular[2], location, regular[1], 100):
+                        return key
+                else:
+                    flag = True
+                    for i in regular:
+                        if not get_location(i, result):
+                            flag = False
+                    if flag:
+                        return key
+            elif isinstance(regular, str):
+                if get_location(regular, result):
                     return key
         return None
 
@@ -247,15 +251,15 @@ class OCR(object):
         Match information between two or more certificates according to config["匹配"]
         :return: dict, e.x. {"车牌": {"LNG车": True}, "姓名": {"驾驶员": True}, "人脸": {"驾驶员": True}}
         """
-        print(self.config["匹配"])
         result = {}
         for key, value in self.config["匹配"].items():
             result[key] = {}
             for k, v in value.items():
                 tmp = []
                 for i in v:
-                    if self.tmp_result[i]:
-                        tmp.append(self.tmp_result[i][key])
+                    if self.tmp_result[i] is not None:
+                        if self.tmp_result[i][key] is not None:
+                            tmp.append(self.tmp_result[i][key])
                 if key == "人脸" and len(tmp) > 1:
                     result[key][k] = True
                     lst = list(itertools.combinations(tmp, 2))
@@ -279,11 +283,15 @@ class OCR(object):
         """
         image = base64_to_image(image_base64)
         ocr_result = self.get_all(image)
-        plate = get_location('[\u4E00-\u9FA5][A-Z][A-Z0-9]{4}[A-Z0-9挂学警港澳]', ocr_result)
+        plate = []
+        for line in ocr_result:
+            info = re.search('[\u4E00-\u9FA5][A-Z][A-Z0-9]{4}[A-Z0-9挂学警港澳]', line[-1][0])
+            if info:
+                plate.append(info.group(0))
         for key, value in self.tmp_result.items():
             if value:
                 if "车牌" in value.keys():
-                    if value["车牌"] == plate:
+                    if value["车牌"] in plate:
                         return True
         return False
 
@@ -296,4 +304,3 @@ class OCR(object):
         feature = face.face_register(image_base64, 0.5)
         self.face_feature.append(feature)
         return feature
-
