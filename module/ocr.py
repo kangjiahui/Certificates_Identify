@@ -234,7 +234,10 @@ class OCR(object):
         :param image_base64: image encoded in base64
         :return: bool, True means face matched, False means face not matched.
         """
-        return face.match_in_ocr(self.tmp_result, image_base64)
+        for feature in self.face_feature:
+            if face.match_identity(feature, 0.5, 0.5, image_base64):
+                return True
+        return False
 
     def info_match(self):
         """
