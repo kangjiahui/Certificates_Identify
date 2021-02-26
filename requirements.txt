@@ -1,0 +1,10 @@
+paddlepaddle-gpu==2.0.0rc1.post100
+paddleocr==2.0.2
+numpy==1.19.5
+opencv_python==4.2.0.32
+dlib==19.21.1
+Flask==1.1.2
+Flask_Cors==3.0.10
+gevent==21.1.2
+Pillow==8.1.0
+PyYAML==5.4.1
