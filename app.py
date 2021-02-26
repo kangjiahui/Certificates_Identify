@@ -33,7 +33,7 @@ def ocr():
 
 # 现场人脸注册
 @app.route('/register', methods=["POST"])
-def face():
+def register():
     if request.form['img_type'] == 'pic':
         input_data = request.files
         return api.face_register(base64.b64encode(input_data["user_image"].read()))
@@ -53,7 +53,7 @@ def face():
 
 # 现场车牌核验
 @app.route('/car', methods=["POST"])
-def face():
+def car():
     if request.form['img_type'] == 'pic':
         input_data = request.files
         return api.car_plate_match(base64.b64encode(input_data["user_image"].read()))
